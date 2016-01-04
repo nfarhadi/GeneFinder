@@ -5,6 +5,6 @@ public class GeneFinder
 {
     public static void main(String[] args)
     {
-        System.out.println("GeneFinder");
+        System.out.println("GeneFinder: Initial Commit");
     }
 }
