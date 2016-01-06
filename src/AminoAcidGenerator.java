@@ -1,3 +1,4 @@
+import java.util.Collections;
 import java.util.HashMap;
 
 /**
@@ -6,21 +7,9 @@ import java.util.HashMap;
 public class AminoAcidGenerator
 {
     public String DNASequence5to3, DNASequence3to5;
-    public static HashMap<String,String> DNAMap;
+    public static final HashMap<String,String> DNAMap;
 
-    public AminoAcidGenerator(String inputDNASequence)
-    {
-        GenerateDNAMap();
-        DNASequence5to3 = inputDNASequence;
-        DNASequence3to5 = GenerateDNASequence3to5(DNASequence5to3);
-    }
-
-    public String GenerateDNASequence3to5(String inputDNASequence)
-    {
-        return inputDNASequence.replace('A','X').replace('C','Y').replace('T','A').replace('G','C').replace('X','T').replace('Y','G');
-    }
-
-    public static void GenerateDNAMap()
+    static
     {
         DNAMap = new HashMap<String,String>();
         DNAMap.put("ATT","I");
@@ -87,6 +76,17 @@ public class AminoAcidGenerator
         DNAMap.put("TAA","*");
         DNAMap.put("TAG","*");
         DNAMap.put("TGA","*");
+    }
+
+    public AminoAcidGenerator(String inputDNASequence)
+    {
+        DNASequence5to3 = inputDNASequence;
+        DNASequence3to5 = GenerateDNASequence3to5(DNASequence5to3);
+    }
+
+    public String GenerateDNASequence3to5(String inputDNASequence)
+    {
+        return inputDNASequence.replace('A','X').replace('C','Y').replace('T','A').replace('G','C').replace('X','T').replace('Y','G');
     }
 }
 
