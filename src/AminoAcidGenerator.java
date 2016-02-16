@@ -1,5 +1,8 @@
-import java.util.Collections;
-import java.util.HashMap;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by navid on 1/5/16.
@@ -73,20 +76,182 @@ public class AminoAcidGenerator
         DNAMap.put("CGG","R");
         DNAMap.put("AGA","R");
         DNAMap.put("AGG","R");
-        DNAMap.put("TAA","*");
-        DNAMap.put("TAG","*");
-        DNAMap.put("TGA","*");
+        DNAMap.put("TAA","Z");
+        DNAMap.put("TAG","Z");
+        DNAMap.put("TGA","Z");
     }
+
+    public String[] aminoAcidSequences; // 0: 5'-3' Frame 1, 1: 5'-3' Frame 2, 2: 5'-3' Frame 3, 3: 3'-5' Frame 1. 4: 3'-5' Frame 2, 5: 3'-5' Frame 3
+    public Vector<Vector<String>> openReadingFrames; // 0: 5'-3' Frame 1, 1: 5'-3' Frame 2, 2: 5'-3' Frame 3, 3: 3'-5' Frame 1. 4: 3'-5' Frame 2, 5: 3'-5' Frame 3
+    public static String[] frameInfo = {"5' to 3' Frame 1: ", "5' to 3' Frame 2: ", "5' to 3' Frame 3: ", "3' to 5' Frame 1: ", "3' to 5' Frame 2: ", "3' to 5' Frame 3: "};
 
     public AminoAcidGenerator(String inputDNASequence)
     {
         DNASequence5to3 = inputDNASequence;
         DNASequence3to5 = GenerateDNASequence3to5(DNASequence5to3);
+        GenerateAminoAcidSequences();
+        GenerateOpenReadingFrames();
+        PrintData();
+    }
+
+    public void PrintData()
+    {
+        System.out.println("\nDNA sequence conversion to amino acids sequences:\n");
+
+        for (int i = 0; i < 6; i++)
+        {
+            System.out.println(frameInfo[i] + aminoAcidSequences[i]);
+
+            if (openReadingFrames.get(i).size() == 0)
+            {
+                System.out.println("No Open Reading Frames for this frame");
+            }
+            else
+            {
+                for (int j = 0; j < openReadingFrames.get(i).size(); j++)
+                {
+                    System.out.println("Open Reading Frame # " + (j+1) + ": " + openReadingFrames.get(i).get(j));
+                }
+            }
+
+            System.out.println();
+        }
+    }
+
+    public void GenerateOpenReadingFrames()
+    {
+        openReadingFrames = new Vector<Vector<String>>();
+
+        Boolean firstM = false;
+
+        for (int i = 0; i < 6; i++)
+        {
+            Vector<String> tempVector = new Vector<String>();
+            String tempString = "";
+            tempVector.clear();
+
+            for (int j = 0; j < aminoAcidSequences[i].length(); j++)
+            {
+                char c = aminoAcidSequences[i].charAt(j);
+
+                if (c == 'M')
+                {
+                    if (firstM == true)
+                    {
+                        tempString += aminoAcidSequences[i].charAt(j);
+                    }
+                    else
+                    {
+                        tempString += aminoAcidSequences[i].charAt(j);
+                        firstM = true;
+                    }
+                }
+                else if (c == 'Z')
+                {
+                    if (firstM == true)
+                    {
+                        firstM = false;
+                        tempVector.add(tempString);
+                        tempString = "";
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    if (firstM == true)
+                    {
+                        tempString += aminoAcidSequences[i].charAt(j);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+            firstM = false;
+            openReadingFrames.add(tempVector);
+        }
+
     }
 
     public String GenerateDNASequence3to5(String inputDNASequence)
     {
-        return inputDNASequence.replace('A','X').replace('C','Y').replace('T','A').replace('G','C').replace('X','T').replace('Y','G');
+        return new StringBuilder(inputDNASequence.replace('A','X').replace('C','Y').replace('T','A').replace('G','C').replace('X','T').replace('Y','G')).reverse().toString();
+    }
+
+    public void GenerateAminoAcidSequences()
+    {
+        String tempSequence = null;
+        String tempCodon = null;
+
+        aminoAcidSequences = new String[6];
+        Arrays.fill(aminoAcidSequences,"");
+
+        // Case for 5'-3' Frame 1
+        tempSequence = DNASequence5to3.substring(0,DNASequence5to3.length() - (DNASequence5to3.length() % 3));
+        for (int i = 0 ; i <= tempSequence.length()-1 ; i = i+3)
+        {
+            aminoAcidSequences[0] += DNAMap.get(tempSequence.substring(i, i + 3));
+        }
+
+        // Case for 5'-3' Frame 2
+        if ((DNASequence5to3.length() % 3) == 0)
+            tempSequence = DNASequence5to3.substring(1,DNASequence5to3.length() - 2);
+        else if ((DNASequence5to3.length() % 3) == 1)
+            tempSequence = DNASequence5to3.substring(1,DNASequence5to3.length());
+        else
+            tempSequence = DNASequence5to3.substring(1,DNASequence5to3.length() - 1);
+        for (int i = 0 ; i <= tempSequence.length()-1 ; i = i+3)
+        {
+            aminoAcidSequences[1] += DNAMap.get(tempSequence.substring(i, i + 3));
+        }
+
+        // Case for 5'-3' Frame 3
+        if ((DNASequence5to3.length() % 3) == 0)
+            tempSequence = DNASequence5to3.substring(2,DNASequence5to3.length() - 1);
+        else if ((DNASequence5to3.length() % 3) == 1)
+            tempSequence = DNASequence5to3.substring(2,DNASequence5to3.length() - 2);
+        else
+            tempSequence = DNASequence5to3.substring(2,DNASequence5to3.length());
+        for (int i = 0 ; i <= tempSequence.length()-1 ; i = i+3)
+        {
+            aminoAcidSequences[2] += DNAMap.get(tempSequence.substring(i, i + 3));
+        }
+
+        // Case for 3'-5' Frame 1
+        tempSequence = DNASequence3to5.substring(0,DNASequence3to5.length() - (DNASequence3to5.length() % 3));
+        for (int i = 0 ; i <= tempSequence.length()-1 ; i = i+3)
+        {
+            aminoAcidSequences[3] += DNAMap.get(tempSequence.substring(i, i + 3));
+        }
+
+
+        // Case for 3'-5' Frame 2
+        if ((DNASequence3to5.length() % 3) == 0)
+            tempSequence = DNASequence3to5.substring(1,DNASequence3to5.length() - 2);
+        else if ((DNASequence3to5.length() % 3) == 1)
+            tempSequence = DNASequence3to5.substring(1,DNASequence3to5.length());
+        else
+            tempSequence = DNASequence3to5.substring(1,DNASequence3to5.length() - 1);
+        for (int i = 0 ; i <= tempSequence.length()-1 ; i = i+3)
+        {
+            aminoAcidSequences[4] += DNAMap.get(tempSequence.substring(i, i + 3));
+        }
+
+        // Case for 3'-5' Frame 3
+        if ((DNASequence3to5.length() % 3) == 0)
+            tempSequence = DNASequence3to5.substring(2,DNASequence3to5.length() - 1);
+        else if ((DNASequence3to5.length() % 3) == 1)
+            tempSequence = DNASequence3to5.substring(2,DNASequence3to5.length() - 2);
+        else
+            tempSequence = DNASequence3to5.substring(2,DNASequence3to5.length());
+        for (int i = 0 ; i <= tempSequence.length()-1 ; i = i+3)
+        {
+            aminoAcidSequences[5] += DNAMap.get(tempSequence.substring(i, i + 3));
+        }
     }
 }
 

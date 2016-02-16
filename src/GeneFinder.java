@@ -15,7 +15,7 @@ public class GeneFinder
 
         while(!isDNASequenceValid(inputDNASequence))
         {
-            System.out.println("Invalid sequence. Note that a valid DNA Sequence consists of only nucleotides A,C,G,T and must be at least 3 nucleotides long.");
+            System.out.println("Invalid sequence. Note that a valid DNA Sequence consists of only nucleotides A,C,G,T and must be at least 6 nucleotides long.");
             System.out.print("Please enter a valid DNA Sequence: ");
             inputDNASequence = scanInputDNASequence.next();
         }
@@ -25,7 +25,7 @@ public class GeneFinder
 
     public static boolean isDNASequenceValid(String DNASequence)
     {
-        if(DNASequence == null || DNASequence.isEmpty() || (DNASequence.length() < 3))
+        if(DNASequence == null || DNASequence.isEmpty() || (DNASequence.length() < 6))
             return false;
 
         for(int i = 0 ; i < DNASequence.length() ; i++)
