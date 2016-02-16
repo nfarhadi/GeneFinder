@@ -84,6 +84,7 @@ public class AminoAcidGenerator
     public String[] aminoAcidSequences; // 0: 5'-3' Frame 1, 1: 5'-3' Frame 2, 2: 5'-3' Frame 3, 3: 3'-5' Frame 1. 4: 3'-5' Frame 2, 5: 3'-5' Frame 3
     public Vector<Vector<String>> openReadingFrames; // 0: 5'-3' Frame 1, 1: 5'-3' Frame 2, 2: 5'-3' Frame 3, 3: 3'-5' Frame 1. 4: 3'-5' Frame 2, 5: 3'-5' Frame 3
     public static String[] frameInfo = {"5' to 3' Frame 1: ", "5' to 3' Frame 2: ", "5' to 3' Frame 3: ", "3' to 5' Frame 1: ", "3' to 5' Frame 2: ", "3' to 5' Frame 3: "};
+    ORFContainer orfContainer;
 
     public AminoAcidGenerator(String inputDNASequence)
     {
@@ -116,11 +117,32 @@ public class AminoAcidGenerator
 
             System.out.println();
         }
+
+        if (orfContainer.ORF.size() == 0)
+        {
+            System.out.println("There is no largest open reading frame because there are no open reading frames");
+        }
+        else if (orfContainer.ORF.size() == 1)
+        {
+            System.out.println("The largest open reading frame was found in " + orfContainer.frames.get(0) + " and it's length is " + orfContainer.ORF.get(0).length() + " amino acids:");
+            System.out.println(orfContainer.ORF.get(0));
+        }
+        else
+        {
+            System.out.println("There were multiple largest open reading frames with length " + orfContainer.ORF.get(0).length() + " amino acids:");
+
+            for (int i = 0; i < orfContainer.ORF.size(); i++)
+            {
+                System.out.println(orfContainer.frames.get(i) + ": " + orfContainer.ORF.get(i));
+            }
+        }
+
     }
 
     public void GenerateOpenReadingFrames()
     {
         openReadingFrames = new Vector<Vector<String>>();
+        orfContainer = new ORFContainer();
 
         Boolean firstM = false;
 
@@ -152,6 +174,7 @@ public class AminoAcidGenerator
                     {
                         firstM = false;
                         tempVector.add(tempString);
+                        orfContainer.add(tempString,frameInfo[i].substring(0,frameInfo[i].length()-2));
                         tempString = "";
                     }
                     else
