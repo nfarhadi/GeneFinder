@@ -3,14 +3,15 @@ import java.util.Scanner;
 /**
  * Created by navid on 1/4/16.
  */
-public class GeneFinder
+public class DNATranslator
 {
     public static void main(String[] args)
     {
         String inputDNASequence;
         Scanner scanInputDNASequence = new Scanner(System.in);
 
-        System.out.print("Please enter a valid DNA Sequence from 5' to 3': ");
+        System.out.println("Welcome to DNA-Translator");
+		System.out.print("Please enter a valid DNA Sequence from 5' to 3': ");
         inputDNASequence = scanInputDNASequence.next();
 
         while(!isDNASequenceValid(inputDNASequence))
